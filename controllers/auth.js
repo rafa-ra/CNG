@@ -5,7 +5,6 @@ exports.getLogin = (req, res, next) => {
   res.render("auth/login", {
     path: "/login",
     pageTitle: "Login",
-    isAuthenticated: req.session.isLoggedIn,
   });
 };
 
@@ -13,17 +12,16 @@ exports.getSignup = (req, res, next) => {
   res.render("auth/signup", {
     path: "/signup",
     pageTitle: "Signup",
-    isAuthenticated: req.session.isLoggedIn,
   });
 };
 
 exports.postLogin = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
-
   User.findOne({ email: email }).then((user) => {
     if (!user) {
-      res.redirect("/");
+      req.flash("error", "Invalid email or password");
+      res.redirect("/login");
     }
 
     bcrypt
