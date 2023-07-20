@@ -1,7 +1,7 @@
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
-//Correct
 
+//-------------LOGIN
 exports.getLogin = (req, res, next) => {
   let message = req.flash("error");
   if (message.length > 0) {
@@ -12,20 +12,6 @@ exports.getLogin = (req, res, next) => {
   res.render("auth/login", {
     path: "/login",
     pageTitle: "Login",
-    errorMessage: message,
-  });
-};
-
-exports.getSignup = (req, res, next) => {
-  let message = req.flash("error");
-  if (message.length > 0) {
-    message = message[0];
-  } else {
-    message = null;
-  }
-  res.render("auth/signup", {
-    path: "/signup",
-    pageTitle: "Signup",
     errorMessage: message,
   });
 };
@@ -56,9 +42,18 @@ exports.postLogin = (req, res, next) => {
   });
 };
 
-exports.postLogout = (req, res, next) => {
-  req.session.destroy(() => {
-    res.redirect("/");
+//-------------SIGNUP
+exports.getSignup = (req, res, next) => {
+  let message = req.flash("error");
+  if (message.length > 0) {
+    message = message[0];
+  } else {
+    message = null;
+  }
+  res.render("auth/signup", {
+    path: "/signup",
+    pageTitle: "Signup",
+    errorMessage: message,
   });
 };
 
@@ -89,8 +84,28 @@ exports.postSignup = (req, res, next) => {
     })
 
     .catch((err) => console.log(err));
+};
 
-  //Checar se o email já existe
-  //Sim: redirecionar para signup page
-  //Não: criar novo usuário com hashed password
+//-------------RESET
+exports.getReset = (req, res, next) => {
+  let message = req.flash("error");
+  if (message.length > 0) {
+    message = message[0];
+  } else {
+    message = null;
+  }
+  res.render("auth/reset", {
+    path: "/reset",
+    pageTitle: "Reset Password",
+    errorMessage: message,
+  });
+};
+
+exports.postReset = (req, res, next) => {};
+
+//-------------LOGOUT
+exports.postLogout = (req, res, next) => {
+  req.session.destroy(() => {
+    res.redirect("/");
+  });
 };
