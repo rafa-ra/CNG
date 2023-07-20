@@ -152,6 +152,56 @@ exports.postReset = (req, res, next) => {
   });
 };
 
+//-------------NEW-PASSWORD
+exports.getNewPassword = (req, res, next) => {
+  let message = req.flash("error");
+  if (message.length > 0) {
+    message = message[0];
+  } else {
+    message = null;
+  }
+  const token = req.params.resetToken;
+  User.findOne({
+    resetToken: token,
+    tokenExpiration: { $gt: Date.now() },
+  }).then((user) => {
+    res.render("auth/new-password", {
+      path: "/new-password",
+      pageTitle: "Reset your password",
+      errorMessage: message,
+      userId: user._id.toString(),
+      resetToken: token,
+    });
+  });
+};
+
+exports.postNewPassword = (req, res, next) => {
+  const newPassword = req.body.password;
+  const userId = req.body.userId;
+  const passwordToken = req.body.resetToken;
+
+  let resetUser;
+
+  User.findOne({
+    resetToken: passwordToken,
+    tokenExpiration: { $gt: Date.now() },
+    _id: userId,
+  })
+    .then((user) => {
+      resetUser = user;
+      return bcrypt.hash(newPassword, 12);
+    })
+    .then((hashedPassword) => {
+      resetUser.password = hashedPassword;
+      resetUser.token = undefined;
+      resetUser.tokenExpiration = undefined;
+      return resetUser.save();
+    })
+    .then((result) => {
+      res.redirect("/login");
+    });
+};
+
 //-------------LOGOUT
 exports.postLogout = (req, res, next) => {
   req.session.destroy(() => {
