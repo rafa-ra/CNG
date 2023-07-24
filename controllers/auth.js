@@ -78,7 +78,11 @@ exports.postLogin = (req, res, next) => {
         req.flash("error", "Invalid email or password");
         res.redirect("/login");
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(err);
+      });
   });
 };
 
@@ -142,7 +146,11 @@ exports.postSignup = (req, res, next) => {
         html: "<h1>You successfully signed up!</h1>",
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(err);
+    });
 };
 
 //-------------RESET
@@ -190,7 +198,11 @@ exports.postReset = (req, res, next) => {
           `,
         });
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(err);
+      });
   });
 };
 
@@ -206,15 +218,21 @@ exports.getNewPassword = (req, res, next) => {
   User.findOne({
     resetToken: token,
     tokenExpiration: { $gt: Date.now() },
-  }).then((user) => {
-    res.render("auth/new-password", {
-      path: "/new-password",
-      pageTitle: "Reset your password",
-      errorMessage: message,
-      userId: user._id.toString(),
-      resetToken: token,
+  })
+    .then((user) => {
+      res.render("auth/new-password", {
+        path: "/new-password",
+        pageTitle: "Reset your password",
+        errorMessage: message,
+        userId: user._id.toString(),
+        resetToken: token,
+      });
+    })
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(err);
     });
-  });
 };
 
 exports.postNewPassword = (req, res, next) => {
@@ -241,6 +259,11 @@ exports.postNewPassword = (req, res, next) => {
     })
     .then((result) => {
       res.redirect("/login");
+    })
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(err);
     });
 };
 
